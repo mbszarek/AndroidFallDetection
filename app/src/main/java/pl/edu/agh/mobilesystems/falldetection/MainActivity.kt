@@ -28,7 +28,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         setContentView(R.layout.activity_main)
         mJob = Job()
         accelerometerService =
-            AccelerometerServiceImpl(getSystemService(Context.SENSOR_SERVICE) as SensorManager)
+            AccelerometerServiceImpl(getSystemService(Context.SENSOR_SERVICE) as SensorManager).also {
+                it.start()
+            }
 
         xCoordinateField = findViewById(R.id.xCoord)
         yCoordinateField = findViewById(R.id.yCoord)
@@ -47,6 +49,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
     override fun onDestroy() {
         super.onDestroy()
+        accelerometerService.stop()
         updateCoordJob.cancel()
     }
 }

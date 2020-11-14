@@ -8,16 +8,21 @@ import android.util.Log
 import pl.edu.agh.mobilesystems.falldetection.accelerometer.AccelerometerData
 import pl.edu.agh.mobilesystems.falldetection.accelerometer.AccelerometerService
 
-class AccelerometerServiceImpl(private val sensorManager: SensorManager) : AccelerometerService, SensorEventListener {
-    companion object Values {
+class AccelerometerServiceImpl(private val sensorManager: SensorManager) : AccelerometerService,
+    SensorEventListener {
+    companion object {
         private const val TAG = "AccelerometerService"
     }
 
     private val sensor: Sensor = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
-    private var currentAccValue: AccelerometerData = AccelerometerData(0.0, 0.0, 0.0)
+    private var currentAccValue: AccelerometerData = AccelerometerData.withInitialValues()
 
-    init {
+    override fun start() {
         sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
+    }
+
+    override fun stop() {
+        sensorManager.unregisterListener(this)
     }
 
     override fun getValue(): AccelerometerData {
@@ -41,6 +46,10 @@ class AccelerometerServiceImpl(private val sensorManager: SensorManager) : Accel
         val yCoordinate = event.values[1]
         val zCoordinate = event.values[2]
 
-        return AccelerometerData(xCoordinate.toDouble(), yCoordinate.toDouble(), zCoordinate.toDouble())
+        return AccelerometerData(
+            xCoordinate.toDouble(),
+            yCoordinate.toDouble(),
+            zCoordinate.toDouble()
+        )
     }
 }
