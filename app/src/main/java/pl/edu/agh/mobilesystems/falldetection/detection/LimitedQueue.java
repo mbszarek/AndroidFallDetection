@@ -17,4 +17,12 @@ public class LimitedQueue<E> extends LinkedList<E> {
         }
         return true;
     }
+
+    @Override
+    public void addFirst(E o) {
+        super.addFirst(o);
+        while (size() > limit) {
+            super.removeLast();
+        }
+    }
 }
