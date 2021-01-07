@@ -1,55 +1,63 @@
 package pl.edu.agh.mobilesystems.falldetection
 
-import android.content.Context
-import android.hardware.SensorManager
-import androidx.appcompat.app.AppCompatActivity
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
-import android.widget.EditText
-import kotlinx.coroutines.*
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import pl.edu.agh.mobilesystems.falldetection.accelerometer.AccelerometerService
-import pl.edu.agh.mobilesystems.falldetection.accelerometer.impl.AccelerometerServiceImpl
-import kotlin.coroutines.CoroutineContext
 
-class MainActivity : AppCompatActivity(), CoroutineScope {
-    private lateinit var accelerometerService: AccelerometerService
+class MainActivity : AppCompatActivity() {
+    private lateinit var bottomNavigationView: BottomNavigationView
 
-    private lateinit var mJob: Job
-    override val coroutineContext: CoroutineContext
-        get() = mJob + Dispatchers.Main
-
-    private lateinit var updateCoordJob: Job
-
-    private lateinit var xCoordinateField: EditText
-    private lateinit var yCoordinateField: EditText
-    private lateinit var zCoordinateField: EditText
+    private fun setCurrentFragment(fragment: Fragment) =
+        supportFragmentManager.beginTransaction().apply {
+            replace(R.id.flFragment, fragment)
+            commit()
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.SEND_SMS),
+                1
+            )
+        }
+
+        Intent(this, AccelerometerService::class.java).also {
+            startService(it)
+        }
+
         setContentView(R.layout.activity_main)
-        mJob = Job()
-        accelerometerService =
-            AccelerometerServiceImpl(getSystemService(Context.SENSOR_SERVICE) as SensorManager).also {
-                it.start()
+
+        bottomNavigationView = findViewById(R.id.bottomNavigationView)
+
+        val readingFragment = ReadingFragment()
+        val configurationFragment = ConfigurationFragment()
+
+        setCurrentFragment(readingFragment)
+
+        bottomNavigationView.setOnNavigationItemSelectedListener {
+            when (it.itemId) {
+                R.id.readings -> setCurrentFragment(readingFragment)
+                R.id.configuration -> setCurrentFragment(configurationFragment)
             }
 
-        xCoordinateField = findViewById(R.id.xCoord)
-        yCoordinateField = findViewById(R.id.yCoord)
-        zCoordinateField = findViewById(R.id.zCoord)
-
-        updateCoordJob = launch {
-            while (true) {
-                val coordinates = accelerometerService.getValue()
-                xCoordinateField.setText(String.format("%.2f", coordinates.xCoordinate))
-                yCoordinateField.setText(String.format("%.2f", coordinates.yCoordinate))
-                zCoordinateField.setText(String.format("%.2f", coordinates.zCoordinate))
-                delay(100)
-            }
+            true
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        accelerometerService.stop()
-        updateCoordJob.cancel()
+    override fun onStop() {
+        super.onStop()
+        stopService(Intent(this, AccelerometerService::class.java))
     }
 }

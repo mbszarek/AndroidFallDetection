@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/readings"
+        android:title="@string/sensor_readings"
+        android:icon="@drawable/ic_readings_foreground"/>
+
+    <item
+        android:id="@+id/configuration"
+        android:title="@string/configuration"
+        android:icon="@drawable/ic_configuration_foreground"/>
+</menu>
