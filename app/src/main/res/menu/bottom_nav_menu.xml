@@ -9,4 +9,10 @@
         android:id="@+id/configuration"
         android:title="@string/configuration"
         android:icon="@drawable/ic_configuration_foreground"/>
+
+    <item
+        android:id="@+id/charts"
+        android:title="@string/charts"
+        android:icon="@drawable/ic_baseline_show_chart_24"/>
+
 </menu>

@@ -43,6 +43,7 @@ class MainActivity : AppCompatActivity() {
 
         val readingFragment = ReadingFragment()
         val configurationFragment = ConfigurationFragment()
+        val chartFragment = ChartFragment()
 
         setCurrentFragment(readingFragment)
 
@@ -50,6 +51,7 @@ class MainActivity : AppCompatActivity() {
             when (it.itemId) {
                 R.id.readings -> setCurrentFragment(readingFragment)
                 R.id.configuration -> setCurrentFragment(configurationFragment)
+                R.id.charts -> setCurrentFragment(chartFragment)
             }
 
             true
