@@ -37,7 +37,6 @@ class ReadingFragment : Fragment(R.layout.fragment_reading), CoroutineScope {
     private lateinit var yCoordinateField: EditText
     private lateinit var zCoordinateField: EditText
     private lateinit var distanceField: EditText
-    private var lastSMSDateTime = LocalDateTime.now()
 
     private lateinit var writer: FileWriter
     private lateinit var buttonStart: Button
@@ -65,13 +64,9 @@ class ReadingFragment : Fragment(R.layout.fragment_reading), CoroutineScope {
         updateCoordJob = launch {
             while (true) {
                 val coordinates = AccelerometerDataStore.getAccelerometerData()
-                val distance = kNNDetector.newData(coordinates)
-                if (distance > kNNDetector.FALL_THRESHOLD) {
+                val distance = AccelerometerDataStore.getDistance()
+                if (distance > KNNDetector.FALL_THRESHOLD) {
                     distanceField.setTextColor(Color.RED)
-                    if (lastSMSDateTime.plusSeconds(15).isBefore(LocalDateTime.now())) {
-                        sendSms()
-                        lastSMSDateTime = LocalDateTime.now()
-                    }
                 } else {
                     distanceField.setTextColor(Color.BLACK)
                 }
@@ -139,34 +134,7 @@ class ReadingFragment : Fragment(R.layout.fragment_reading), CoroutineScope {
         //  return "/storage/emulated/0/Android/data/com.iam360.sensorlog/";
     }
 
-    private fun sendSms() {
-        val applicationContext = activity!!.applicationContext
-        val sharedPreferences = applicationContext.getSharedPreferences(
-            Constants.AppName,
-            Context.MODE_PRIVATE
-        )
-        val iceNumber = sharedPreferences.getString(Constants.IceNumberField, null)
 
-
-        iceNumber?.also { number ->
-            Log.d(Constants.AccelerometerService, "Sending sms to number $number")
-
-            val intent = Intent(applicationContext, AccelerometerService::class.java)
-            val pendingIntent = PendingIntent.getActivity(applicationContext, 0, intent, 0)
-
-            smsManager.sendTextMessage(
-                number,
-                null,
-                Constants.WarningMessage,
-                pendingIntent,
-                null
-            )
-        }
-
-        if (iceNumber == null) {
-            Log.e(Constants.AccelerometerService, "ICE number is not set!")
-        }
-    }
 
     override fun onDestroyView() {
         super.onDestroyView()

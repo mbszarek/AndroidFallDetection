@@ -14,7 +14,7 @@ public class KNNDetector {
     int QUEUE_LIMIT = 100;
     int N_NEIGHBORS = 3;
     int WINDOW_SIZE = 4;
-    public int FALL_THRESHOLD = 20;
+    public final static int FALL_THRESHOLD = 20;
 
     LimitedQueue<AccelerometerData> limitedQueue;
 
